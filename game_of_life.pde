@@ -80,17 +80,19 @@ class board {
   // render the cells
   void gridDraw() {
     fill(0, 255, 0);
+    stroke(0, 255, 0);
 
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
         if (grid[i][j].state) {
           int x = i * gridWidth;
           int y = j * gridHeight;
-          rect(x, y, x + gridWidth, y + gridHeight);
+          rect(x, y, gridWidth, gridHeight);
           circle(x, y, 500);
         }
       }
     }
+
   }
 
   // update the cells
@@ -101,10 +103,11 @@ class board {
           int neighbors = 0;
           for (int k = -1; k <= 1; k++) {
             for (int l = -1; k <= 1; k++) {
-              if ((grid[i+k][j+l].state == true) && !(k == 0 && l == 0)) {
+              if (grid[i+k][j+l].state) {
                 neighbors++;
               }
             }
+            if (grid[i][j].state) neighbors--;
             next[i][j].update(neighbors);
           }
         }
