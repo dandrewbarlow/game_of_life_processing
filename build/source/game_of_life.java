@@ -23,17 +23,19 @@ public class game_of_life extends PApplet {
 // Factors of 1080
 // 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 27, 30, 36, 40, 45, 54, 60, 72, 90, 108, 120, 135, 180, 216, 270, 360, 540
 
+int xMax = 1920;
+int yMax = 1080;
 
 // how big the squares are
 int gridWidth = 120;
 int gridHeight = 108;
 
 // the number of squares in both dimentions
-int w = width / gridWidth;
-int h = height / gridWidth;
+int w = xMax / gridWidth;
+int h = yMax / gridWidth;
 
 
-class cell {
+class cells {
   // true = life
   // false = death
   boolean state;
@@ -61,15 +63,22 @@ class cell {
 }
 
 class board {
-  cell[][] grid = new cell[w][h];
-  cell[][] next = new cell [w][h];
+  cells[][] grid = new cells[w][h];
+  cells[][] next = new cells[w][h];
+
   // init constructor
-  public void board() {
+  public void generate() {
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
+        
+        grid[i][j] = new cells();
+        next[i][j] = new cells();
+
         if (random(10) > 5) {
+          if (grid[i][j] != null) {
             grid[i][j].state = true;
-            next[i][j].state = true;
+            next[i][j].state = true; //<>//
+          }
         }
         else {
           grid[i][j].state = false;
@@ -85,27 +94,35 @@ class board {
     fill(0, 255, 0);
     stroke(0, 255, 0);
 
-    for (int i = 0; i < width; i+=gridWidth) {
-      line(i, 0, i, height);
+    for (int i = 0; i < xMax; i+=gridWidth) {
+      line(i, 0, i, yMax);
     }
-    for (int j = 0; j < height; j+=gridHeight) {
-      line(0, j, width, j);
+    for (int j = 0; j < xMax; j+=gridHeight) {
+      line(0, j, xMax, j);
     }
+  }
+
+  // abstract the rectangle drawing to an x-y coordinate system
+  public void drawRect(int x, int y) {
+    rect(x * gridWidth, y * gridHeight, gridWidth, gridHeight);
   }
 
   // render the cells
   public void gridDraw() {
     fill(0, 255, 0);
-    stroke(0, 255, 0);
 
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
-        if (grid[i][j].state) {
+
+
+        if (grid[i][j] != null && grid[i][j].state) {
           int x = i * gridWidth;
           int y = j * gridHeight;
-          rect(x, y, gridWidth, gridHeight);
-          circle(x, y, 500);
+          drawRect(x,y);
+          drawRect(x,y+1);
+          // circle(x, y, 500);
         }
+
       }
     }
 
@@ -119,13 +136,14 @@ class board {
           int neighbors = 0;
           for (int k = -1; k <= 1; k++) {
             for (int l = -1; k <= 1; k++) {
-              if (grid[i+k][j+l].state) {
-                neighbors++;
+              if (grid[i+k][j+l] != null && grid[i+k][j+l].state) {
+                  neighbors++;
               }
+
             }
-            if (grid[i][j].state) neighbors--;
-            next[i][j].update(neighbors);
           }
+          if (grid[i][j].state) neighbors--;
+          next[i][j].update(neighbors);
         }
       }
 
@@ -141,7 +159,9 @@ class board {
 board lifeBoard = new board();
 
 public void setup() {
+  // referred as xMax and yMax in the code bc of weird stuff
   
+  lifeBoard.generate();
 }
 
 
@@ -150,10 +170,10 @@ public void setup() {
 
 
 public void draw() {
-  background(0);
+  background(0); //<>//
   lifeBoard.gridLines();
   lifeBoard.gridDraw();
-  lifeBoard.gridUpdate();
+  // lifeBoard.gridUpdate();
 }
   public void settings() {  size(1920, 1080); }
   static public void main(String[] passedArgs) {
