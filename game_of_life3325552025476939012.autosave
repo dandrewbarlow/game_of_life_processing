@@ -1,19 +1,3 @@
-import processing.core.*; 
-import processing.data.*; 
-import processing.event.*; 
-import processing.opengl.*; 
-
-import java.util.HashMap; 
-import java.util.ArrayList; 
-import java.io.File; 
-import java.io.BufferedReader; 
-import java.io.PrintWriter; 
-import java.io.InputStream; 
-import java.io.OutputStream; 
-import java.io.IOException; 
-
-public class game_of_life extends PApplet {
-
 
 
 
@@ -41,7 +25,7 @@ class cells {
   boolean state;
 
   // pass value of neighbors and update cell status
-  public void update(int neighbors) {
+  void update(int neighbors) {
 
     if (state == true) {
       // lonely death
@@ -67,7 +51,7 @@ class board {
   cells[][] next = new cells[w][h];
 
   // init constructor
-  public void generate() {
+  void generate() {
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
 
@@ -89,7 +73,7 @@ class board {
   }
 
   // display gridlines
-  public void gridLines() {
+  void gridLines() {
 
     fill(0, 255, 0);
     stroke(0, 255, 0);
@@ -103,12 +87,12 @@ class board {
   }
 
   // abstract the rectangle drawing to an x-y coordinate system
-  public void drawRect(int x, int y) {
+  void drawRect(int x, int y) {
     rect(x * gridWidth, y * gridHeight, gridWidth, gridHeight);
   }
 
   // render the cells
-  public void gridDraw() {
+  void gridDraw() {
     fill(0, 255, 0);
 
     for (int i = 0; i < w; i++) {
@@ -125,7 +109,7 @@ class board {
   }
 
   // update the cells
-  public void gridUpdate() {
+  void gridUpdate() {
       for (int i = 0; i < w; i++) {
         for (int j = 0; j < h; j++) {
 
@@ -141,12 +125,12 @@ class board {
 
           }}
 
-          if (grid[i][j].state && neighbors > 0) neighbors--;
+          if (grid[i][j].state) neighbors--;
           next[i][j].update(neighbors);
 
     }}
   }
-  public void gridSwitch() {
+  void gridSwitch() {
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
         grid[i][j].state = next[i][j].state;
@@ -159,9 +143,9 @@ class board {
 
 board lifeBoard = new board();
 
-public void setup() {
+void setup() {
   // referred as xMax and yMax in the code bc of weird stuff
-  
+  size(1920, 1080);
   lifeBoard.generate();
 
 }
@@ -171,7 +155,7 @@ public void setup() {
 
 
 
-public void draw() {
+void draw() {
   background(0);
   lifeBoard.gridLines();
   lifeBoard.gridDraw();
@@ -179,13 +163,3 @@ public void draw() {
   lifeBoard.gridSwitch();
 
  }
-  public void settings() {  size(1920, 1080); }
-  static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "game_of_life" };
-    if (passedArgs != null) {
-      PApplet.main(concat(appletArgs, passedArgs));
-    } else {
-      PApplet.main(appletArgs);
-    }
-  }
-}

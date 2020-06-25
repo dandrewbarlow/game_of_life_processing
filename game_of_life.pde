@@ -11,8 +11,8 @@ int xMax = 1920;
 int yMax = 1080;
 
 // how big the squares are
-int gridWidth = 120;
-int gridHeight = 108;
+int gridWidth = 12;
+int gridHeight = 15;
 
 // the number of squares in both dimentions
 int w = xMax / gridWidth;
@@ -114,25 +114,30 @@ class board {
         for (int j = 0; j < h; j++) {
 
           int neighbors = 0;
+
           for (int k = -1; k <= 1; k++) {
             for (int l = -1; k <= 1; k++) {
-              if (grid[i+k][j+l] != null && grid[i+k][j+l].state) {
+              // check bounds b4 op
+              if ( (i + k >= 0 && i + k < w) && (j + l >= 0 && j + l < w)) {
+                if (grid[i+k][j+l].state) {
                   neighbors++;
-              }
+              }}
 
-            }
-          }
-          if (grid[i][j].state) neighbors--;
+          }}
+
+          if (grid[i][j].state && neighbors > 0) neighbors--;
           next[i][j].update(neighbors);
-        }
-      }
 
-      for (int i = 0; i < w; i++) {
-        for (int j = 0; j < w; j++) {
-          grid[i][j] = next[i][j];
-        }
+    }}
+  }
+  void gridSwitch() {
+    for (int i = 0; i < w; i++) {
+      for (int j = 0; j < h; j++) {
+        grid[i][j].state = next[i][j].state;
       }
     }
+  }
+
 
 }
 
@@ -142,6 +147,7 @@ void setup() {
   // referred as xMax and yMax in the code bc of weird stuff
   size(1920, 1080);
   lifeBoard.generate();
+
 }
 
 
@@ -153,5 +159,7 @@ void draw() {
   background(0);
   lifeBoard.gridLines();
   lifeBoard.gridDraw();
-  // lifeBoard.gridUpdate();
-}
+  lifeBoard.gridUpdate();
+  lifeBoard.gridSwitch();
+
+ }
