@@ -23,22 +23,58 @@ public class game_of_life extends PApplet {
 // Factors of 1080
 // 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 27, 30, 36, 40, 45, 54, 60, 72, 90, 108, 120, 135, 180, 216, 270, 360, 540
 
+//Common factors:
+// 1; 2; 3; 4; 5; 6; 8; 10; 12; 15; 20; 24; 30; 40; 60 and 120
 int xMax = 1920;
 int yMax = 1080;
 
 // how big the squares are
-int gridWidth = 12;
+int gridWidth = 15;
 int gridHeight = 15;
 
 // the number of squares in both dimentions
 int w = xMax / gridWidth;
 int h = yMax / gridWidth;
 
+//which turn is it
+int ticker = 0;
+
+boolean recording = false;
+
+// handle recording logic
+public void redLight() {
+  if (recording) {
+    // save the current frame
+    saveFrame("./frames/frame_#####.png");
+    // prep for a red coicle
+    setRed();
+  }
+  else {
+    // prep for green coicle
+    setGreen();
+  }
+  ellipse(30, 30, 30, 30);
+}
+
+
+// Quick color shortcuts
+public void setRed() {
+  fill(255, 0, 0);
+}
+public void setBlue() {
+  fill(0, 0, 255);
+}
+public void setGreen() {
+  fill(0, 255, 0);
+}
 
 class cells {
   // true = life
   // false = death
   boolean state;
+
+  int x;
+  int y;
 
   // pass value of neighbors and update cell status
   public void update(int neighbors) {
@@ -52,12 +88,14 @@ class cells {
       else if (neighbors > 3) {
         state = false;
       }
+      else state = true;
     }
     else if (state == false) {
       // he is risen
       if (neighbors == 3) {
         state = true;
       }
+      else state = false;
     }
   }
 }
@@ -73,6 +111,13 @@ class board {
 
         grid[i][j] = new cells();
         next[i][j] = new cells();
+
+        grid[i][j].x = i;
+        grid[i][j].y = j;
+
+        next[i][j].x = i;
+        next[i][j].y = j;
+
 
         if (random(10) > 5) {
           if (grid[i][j] != null) {
@@ -91,8 +136,8 @@ class board {
   // display gridlines
   public void gridLines() {
 
-    fill(0, 255, 0);
-    stroke(0, 255, 0);
+    setGreen();
+    // stroke(0, 255, 0);
 
     for (int i = 0; i < xMax; i+=gridWidth) {
       line(i, 0, i, yMax);
@@ -109,14 +154,13 @@ class board {
 
   // render the cells
   public void gridDraw() {
-    fill(0, 255, 0);
+    setGreen();
 
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
 
         if (grid[i][j] != null && grid[i][j].state) {
           drawRect(i, j);
-          // circle(x, y, 500);
         }
 
       }
@@ -126,35 +170,32 @@ class board {
 
   // update the cells
   public void gridUpdate() {
+      // go through grid
       for (int i = 0; i < w; i++) {
         for (int j = 0; j < h; j++) {
 
+          // initialize value of neighbors at 0
           int neighbors = 0;
 
+          // go through a 3x3 grid around the current cell and add the neighbors
           for (int k = -1; k <= 1; k++) {
-            for (int l = -1; k <= 1; k++) {
+            for (int l = -1; l <= 1; l++) {
+
               // check bounds b4 op
-              if ( (i + k >= 0 && i + k < w) && (j + l >= 0 && j + l < w)) {
-                if (grid[i+k][j+l].state) {
+              if ( (i + k >= 0 && i + k < w) && (j + l >= 0 && j + l < h )) {
+
+                // don't count the square itself as a neighbor
+                if ( (grid[i+k][j+l].state == true) && (i + k != 0 || j + l != 0)) {
                   neighbors++;
               }}
 
           }}
 
-          if (grid[i][j].state && neighbors > 0) neighbors--;
-          next[i][j].update(neighbors);
 
+          next[i][j].update(neighbors);
+          grid[i][j].state = next[i][j].state;
     }}
   }
-  public void gridSwitch() {
-    for (int i = 0; i < w; i++) {
-      for (int j = 0; j < h; j++) {
-        grid[i][j].state = next[i][j].state;
-      }
-    }
-  }
-
-
 }
 
 board lifeBoard = new board();
@@ -163,20 +204,31 @@ public void setup() {
   // referred as xMax and yMax in the code bc of weird stuff
   
   lifeBoard.generate();
+  noStroke();
+}
+
+// regenerate on the fly for testing and record the output
+public void keyPressed() {
+  if (key == 'y' || key == 'Y') {
+    lifeBoard.generate();
+  }
+  if (key == 'r' || key == 'R') {
+    recording = !recording;
+  }
 
 }
 
 
 
-
-
-
 public void draw() {
   background(0);
+  ticker++;
+
   lifeBoard.gridLines();
   lifeBoard.gridDraw();
   lifeBoard.gridUpdate();
-  lifeBoard.gridSwitch();
+
+  redLight();
 
  }
   public void settings() {  size(1920, 1080); }
